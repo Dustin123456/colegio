@@ -1,0 +1,31 @@
+create or replace function Actualizar_curso() returns trigger 
+as
+$$
+declare
+periodoo VARCHAR(10);
+tutor varchar(10);
+nivel varchar(10);
+begin 
+    IF (TG_OP = 'INSERT') THEN
+	SELECT NEW.PERIODO, new.profesor_tutor, new.nivel_paralelo FROM estudiantes_curso
+	INTO PERIODOo, tutor, nivel;
+	UPDATE curso set estudiantes = estudiantes +1 
+	WHERE curso.PERIODO = PERIODOo and  curso.profesor_tutor = tutor and
+	curso.nivel_paralelo = nivel ; 
+       RETURN NEW;    
+    ELSEIF (TG_OP = 'DELETE') THEN
+	SELECT old.PERIODO, old.profesor_tutor, old.nivel_paralelo FROM estudiantes_curso
+	INTO PERIODOo, tutor, nivel;
+	UPDATE curso set estudiantes = estudiantes -1 
+	WHERE curso.PERIODO = PERIODO and curso.profesor_tutor = tutor and
+	curso.nivel_paralelo = nivel ; 
+    RETURN NULL;
+END IF;
+  END;
+$$
+language plpgsql;
+
+create trigger estudiante_curso after insert or delete
+on estudiantes_curso
+for each row
+execute procedure Actualizar_curso();
