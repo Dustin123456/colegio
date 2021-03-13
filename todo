@@ -1,0 +1,463 @@
+/*==============================================================*/
+/* DBMS name:      PostgreSQL 8                                 */
+/* Created on:     18/12/2020 13:17:18                          */
+/*==============================================================*/
+
+/*==============================================================*/
+/* Table: CURSO                                                 */
+/*==============================================================*/
+create table CURSO (
+   PERIODO    		  	VARCHAR(10)          not null,
+   PROFESOR_TUTOR       VARCHAR(50)          not null,
+   NIVEL_PARALELO       VARCHAR(10)          not null,
+   UBICACION_CURSO      VARCHAR(10)          null,
+   ESTUDIANTES			INT2				 ,
+   constraint PK_CURSO primary key (PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO)
+);
+
+/*==============================================================*/
+/* Table: ESTUDIANTE                                            */
+/*==============================================================*/
+create table ESTUDIANTE (
+   ID_ESTUDIANTE        VARCHAR(10)      not null,
+   ID_REPRESENTANTE     VARCHAR(10)      not null,
+   CEDULA_ESTUDIANTE    VARCHAR(10)          null,
+   NOMBRES_ESTUDIANTE   VARCHAR(50)          null,
+   APELLIDOS_ESTUDIANTE VARCHAR(50)          null,
+   GENERO               VARCHAR(10)          null,
+   FECHA_DE_NACIMIENTO  DATE                 null,
+   DIRECCION            VARCHAR(30)          null,
+   TELEFONO             VARCHAR(20)          null,
+   constraint PK_ESTUDIANTE primary key (ID_ESTUDIANTE)
+);
+
+/*==============================================================*/
+/* Table: ESTUDIANTES_CURSO                                     */
+/*==============================================================*/
+create table ESTUDIANTES_CURSO (
+   PERIODO      	    VARCHAR(10)        	 not null,
+   PROFESOR_TUTOR       VARCHAR(50)          not null,
+   NIVEL_PARALELO       VARCHAR(10)          not null,
+   ID_ESTUDIANTE        VARCHAR(10)          not null,
+   constraint PK_ESTUDIANTES_CURSO primary key (PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO, ID_ESTUDIANTE)
+);
+
+/*==============================================================*/
+/* Table: ESTUDIANTE_MATERIA                                    */
+/*==============================================================*/
+create table ESTUDIANTE_MATERIA (
+   ID_PROFESOR          VARCHAR(10)          not null,
+   ASIGNATURA           VARCHAR(20)          not null,
+   ID_ESTUDIANTE        VARCHAR(10)          not null,
+   NOTA1                INT2                 null,
+   NOTA2                INT2                 null,
+   RECUPERACION         INT2                 null,
+   RESULTADO            BOOL                 null,
+	PERIODO				varchar(10)			 not null,
+	TUTOR				varchar(50)			 not null,
+	NIVEL_PARALELO		varchar(10)			 not null,
+   constraint PK_ESTUDIANTE_MATERIA primary key (ID_PROFESOR, ASIGNATURA, ID_ESTUDIANTE)
+);
+
+/*==============================================================*/
+/* Table: PERIODO_ACADEMICO                                     */
+/*==============================================================*/
+create table PERIODO_ACADEMICO (
+   INICIO_PERIODO       VARCHAR(10)          not null,
+	FINAL_PERIODO		 VARCHAR(10)		NOT	NULL,
+   ESTUDIANTES_MATRICULADOS INT2                 null,
+   PROFESORES_ACTIVOS   INT2                 null,
+   constraint PK_PERIODO_ACADEMICO primary key (INICIO_PERIODO)
+);
+
+/*==============================================================*/
+/* Table: MATRICULA_ESTUDIANTE                                  */
+/*==============================================================*/
+create table matricula_estudiante (
+	ID_MATRICULA VARCHAR(10),
+	ESTUDIANTE VARCHAR(10),
+	MPERIODO varchar(10),
+	CONSTRAINT periodo_matricula_fk FOREIGN KEY (MPERIODO) REFERENCES periodo_academico (INICIO_PERIODO)
+    ON DELETE SET NULL ON UPDATE CASCADE,	
+		CONSTRAINT estudiante_matricula_fk FOREIGN KEY (ESTUDIANTE) REFERENCES ESTUDIANTE (ID_ESTUDIANTE)
+    ON DELETE SET NULL ON UPDATE CASCADE);	
+	
+
+/*==============================================================*/
+/* Table: PROFESOR                                              */
+/*==============================================================*/
+create table PROFESOR (
+   ID_PROFESOR          VARCHAR(10)          not null,
+   NOMBRE               VARCHAR(20)          null,
+   ASIGNATURA           VARCHAR(20)          not null,
+   constraint PK_PROFESOR primary key (ID_PROFESOR, ASIGNATURA)
+);
+
+/*==============================================================*/
+/* Table: PROFESORES_CURSO                                      */
+/*==============================================================*/
+create table PROFESORES_CURSO (
+   PERIODO 		        VARCHAR(10)          not null,
+   PROFESOR_TUTOR       VARCHAR(50)          not null,
+   NIVEL_PARALELO       VARCHAR(10)          not null,
+   ID_PROFESOR          VARCHAR(10)          not null,
+   ASIGNATURA           VARCHAR(20)          not null,
+   constraint PK_PROFESORES_CURSO primary key (PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO, ID_PROFESOR, ASIGNATURA)
+);
+
+
+
+/*==============================================================*/
+/* Table: REPRESENTANTE_ESTUDIANTE                              */
+/*==============================================================*/
+create table REPRESENTANTE_ESTUDIANTE (
+   ID_REPRESENTANTE     VARCHAR(10)                 not null,
+   CEDULA_S_            VARCHAR(30)          null,
+   NOMBRES_REPRESENTANTE VARCHAR(100)         null,
+   APELLIDOS_REPRESENTANTE VARCHAR(100)         null,
+   DIRECCION_DOMICILIARIA VARCHAR(30)          null,
+   TELEFONO_DE_DOMICILIO VARCHAR(30)          null,
+   DIRECCION_DE_TRABAJO VARCHAR(60)          null,
+   TELEFONO_DE_TRABAJO  VARCHAR(30)          null,
+   PADRE_ACTIVO         BOOL                 null,
+   MADRE_ACTIVA         BOOL                 null,
+   constraint PK_REPRESENTANTE_ESTUDIANTE primary key (ID_REPRESENTANTE)
+);
+
+
+alter table CURSO
+   add constraint FK_CURSO_CURSOS_PE_PERIODO_ foreign key (PERIODO)
+      references PERIODO_ACADEMICO (INICIO_PERIODO)
+      on delete restrict on update restrict;
+
+alter table ESTUDIANTE
+   add constraint FK_ESTUDIAN_REPRESENT_REPRESEN foreign key (ID_REPRESENTANTE)
+      references REPRESENTANTE_ESTUDIANTE (ID_REPRESENTANTE)
+      on delete restrict on update restrict;
+
+alter table ESTUDIANTES_CURSO
+   add constraint FK_ESTUDIAN_ESTUDIANT_CURSO foreign key (PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO)
+      references CURSO (PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO)
+      on delete restrict on update restrict;
+
+alter table ESTUDIANTES_CURSO
+   add constraint FK_ESTUDIAN_ESTUDIANT_ESTUDIAN foreign key (ID_ESTUDIANTE)
+      references ESTUDIANTE (ID_ESTUDIANTE)
+      on delete restrict on update restrict;
+
+ 	  
+
+alter table ESTUDIANTE_MATERIA
+   add constraint FK_ESTUDIAN_ESTUDIANT_ESTUDIAN foreign key (ID_ESTUDIANTE)
+      references ESTUDIANTE (ID_ESTUDIANTE)
+      on delete restrict on update restrict;
+	  
+alter table ESTUDIANTE_MATERIA
+   add constraint FK_ESTUDIAN_ESTUDIANT_PROFESOR foreign key (ID_PROFESOR, ASIGNATURA, PERIODO, TUTOR, NIVEL_PARALELO)
+      references PROFESORES_CURSO (ID_PROFESOR, ASIGNATURA, PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO)
+      on delete restrict on update restrict;	 
+	  
+alter table PROFESORES_CURSO
+   add constraint FK_PROFESOR_PROFESORE_CURSO foreign key (PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO)
+      references CURSO (PERIODO, PROFESOR_TUTOR, NIVEL_PARALELO)
+      on delete restrict on update restrict;
+
+alter table PROFESORES_CURSO
+   add constraint FK_PROFESOR_PROFESORE_PROFESOR foreign key (ID_PROFESOR, ASIGNATURA)
+      references PROFESOR (ID_PROFESOR, ASIGNATURA)
+      on delete restrict on update restrict;
+
+
+
+
+--INSERCION ESTUDIANTES Y REPRESENTANTES
+insert into representante_estudiante  values 
+( '01', '1111111111 - 2222222222','RAUL JOSE - MARIA MARTHA', 'ZAMBRANO ZAMBRANO - VERA VERA', 'AVENIDA 125 CALLE 120', 
+											  '098282828', 'AVENIDA 130 CALLE 136 - AVENIDA 110 CALLE 120', '098787878- 090909383', TRUE, TRUE );
+insert into representante_estudiante  values 
+( '02', '2626262626', 'LUIS MARIO','GONZALES VERA', 'AVENIDA 115 CALLE 100', 
+											  '098245828', 'AVENIDA 130 CALLE 136', '098787878', FALSE, FALSE);	
+insert into representante_estudiante  values 
+( '03', '1111111134 - 3422222222','CARLOS JOSE - MYRIAM MARIA', 'FLORES ZAMBRANO -  CHOEZ GUANOQUISA', 'AVENIDA 111 CALLE 120', 
+											  '098223828', 'AVENIDA 121 CALLE 116 - AVENIDA 150 CALLE 100', '098567878 - 090769383', TRUE, FALSE );											  
+						
+insert into estudiante  values ('01', '01', '1234567898', 'CARLOS JOSE', 'ZAMBRANO VERA', 'MASCULINO', '12/05/2000', 'AVENIDA 125 CALLE 120', '098287345');
+insert into estudiante  values ('02', '02', '1235554667', 'FERNANDA ESTEFANIA', 'GARCIA MACIAS', 'FEMENINO', '20/10/2001', 'AVENIDA 115 CALLE 100', '0909899838' );
+insert into estudiante  values ('03', '01', '1243434445', 'MARIO VIKTOR', 'ZAMBRANO VERA', 'MASCULINO', '05/07/2003','AVENIDA 125 CALLE 120', '098287345' );
+insert into estudiante  values ('04', '03','1545454567', 'JOSE JOSE', 'FLORES CHOEZ', 'MASCULINO', '12/02/2005', 'AVENIDA 111 CALLE 120', '098223828');
+insert into estudiante  values ('05', '03', '5546777756', 'MARIA MELINA', 'FLORES CHOEZ', 'FEMENINO', '15/05/2003', 'AVENIDA 111 CALLE 120', '098223828');
+insert into estudiante  values ('06', '01', '5546778756', 'FERNANDA KIMBERLY', 'ZAMBRANO VERA', 'FEMENINO', '10/02/2001', 'AVENIDA 125 CALLE 120', '098287345');
+insert into estudiante  values ('07', '02', '5546770756', 'ALEXA BLISS', 'GARCIA MACIAS', 'FEMENINO', '16/10/2005', 'AVENIDA 115 CALLE 100', '0909899838');
+
+--PERIODO ACADEMICO
+INSERT INTO periodo_academico values('2009','2010',0,0);
+INSERT INTO periodo_academico values('2010','2011',0,0);
+INSERT INTO periodo_academico values('2011','2012',0,0);
+
+
+--CURSO
+
+insert into curso  values ( '2009', 'Quiñonez', 'decimoA', '3erPISO-2B',0);
+insert into curso  values ( '2010', 'Quiñonez', 'decimoA', '3erPISO-2B',0);
+insert into curso  values ( '2011', 'Quiñonez', 'decimoA', '3erPISO-2B',0);
+
+
+insert into curso  values ( '2009', 'Ruffy', 'decimoB', '3erPISO-3B',0);
+insert into curso  values ( '2010', 'Ruffy', 'decimoB', '3erPISO-3B',0);
+insert into curso  values ( '2011', 'Ruffy', 'decimoB', '3erPISO-3B',0);
+
+
+insert into curso  values ( '2009', 'Lionel', 'decimoC', '3erPISO-1B',0);
+insert into curso  values ( '2010', 'Lionel', 'decimoC', '3erPISO-1B',0);
+insert into curso  values ( '2011', 'Lionel', 'decimoC', '3erPISO-1B',0);
+
+insert into curso  values ( '2009', 'Lucio', 'novenoA', '3erPISO-3A',0);
+insert into curso  values ( '2010', 'Lucio', 'novenoA', '3erPISO-3A',0);
+insert into curso  values ( '2011', 'Lucio', 'novenoA', '3erPISO-3A',0);
+
+insert into curso  values ( '2009', 'Adriano', 'novenoB', '3erPISO-2A',0);
+insert into curso  values ( '2010', 'Adriano', 'novenoB', '3erPISO-2A',0);
+insert into curso  values ( '2011', 'Adriano', 'novenoB', '3erPISO-2A',0);
+
+insert into curso  values ( '2009', 'Carlos', 'novenoC', '3erPISO-1A',0);
+insert into curso  values ( '2010', 'Carlos', 'novenoC', '3erPISO-1A',0);
+insert into curso  values ( '2011', 'Carlos', 'novenoC', '3erPISO-1A',0);
+
+insert into curso  values ( '2009', 'Quijije', 'octavoA', '2doPISO-3B',0);
+insert into curso  values ( '2010', 'Quijije', 'octavoA', '2doPISO-3B',0);
+insert into curso  values ( '2011', 'Quijije', 'octavoA', '2doPISO-3B',0);
+
+insert into curso  values ( '2009', 'Dustin', 'octavoB', '2doPISO-2B',0);
+insert into curso  values ( '2010', 'Dustin', 'octavoB', '2doPISO-2B',0);
+insert into curso  values ( '2011', 'Dustin', 'octavoB', '2doPISO-2B',0);
+
+insert into curso  values ( '2009', 'Marlos', 'octavoC', '2doPISO-1B',0);
+insert into curso  values ( '2010', 'Marlos', 'octavoC', '2doPISO-1B',0);
+insert into curso  values ( '2011', 'Marlos', 'octavoC', '2doPISO-1B',0);
+
+insert into curso  values ( '2009', 'Maria', 'primeroA', '2doPISO-3A',0);
+insert into curso  values ( '2010', 'Maria', 'primeroA', '2doPISO-3A',0);
+insert into curso  values ( '2011', 'Maria', 'primeroA', '2doPISO-3A',0);
+
+insert into curso  values ( '2009', 'Romina', 'primeroB', '2d0PISO-2A',0);
+insert into curso  values ( '2010', 'Romina', 'primeroB', '2d0PISO-2A',0);
+insert into curso  values ( '2011', 'Romina', 'primeroB', '2d0PISO-2A',0);
+
+insert into curso  values ( '2009', 'Asly', 'primeroC', '2doPISO-1A',0);
+insert into curso  values ( '2010', 'Asly', 'primeroC', '2doPISO-1A',0);
+insert into curso  values ( '2011', 'Asly', 'primeroC', '2doPISO-1A',0);
+
+insert into curso  values ( '2009', 'Natalia', 'segundoA', '2doPISO-2C',0);
+insert into curso  values ( '2010', 'Natalia', 'segundoA', '2doPISO-2C',0);
+insert into curso  values ( '2011', 'Natalia', 'segundoA', '2doPISO-2C',0);
+
+insert into curso  values ( '2009', 'Sergio','segundoB',  '2doPISO-1C',0);
+insert into curso  values ( '2010', 'Sergio','segundoB',  '2doPISO-1C',0);
+insert into curso  values ( '2011', 'Sergio','segundoB',  '2doPISO-1C',0);
+
+insert into curso  values ( '2009', 'Melany', 'segundoC', '2doPISO-3C',0);
+insert into curso  values ( '2010', 'Melany', 'segundoC', '2doPISO-3C',0);
+insert into curso  values ( '2011', 'Melany', 'segundoC', '2doPISO-3C',0);
+
+insert into curso  values ( '2009', 'Fernanda', 'terceroA', '1erPISO-3B',0);
+insert into curso  values ( '2010', 'Fernanda', 'terceroA', '1erPISO-3B',0);
+insert into curso  values ( '2011', 'Fernanda', 'terceroA', '1erPISO-3B',0);
+
+insert into curso  values ( '2009', 'Alfredo','terceroB',  '1erPISO-2B',0);
+insert into curso  values ( '2010', 'Alfredo','terceroB',  '1erPISO-2B',0);
+insert into curso  values ( '2011', 'Alfredo','terceroB',  '1erPISO-2B',0);
+
+insert into curso  values ( '2011', 'Marcelo','terceroC',  '3erPISO-5A',0);
+insert into curso  values ( '2010', 'Marcelo','terceroC',  '3erPISO-5A',0);
+insert into curso  values ( '2009', 'Marcelo','terceroC',  '3erPISO-5A',0);
+
+
+--PROFESORES-ASIGNATURAS
+insert into profesor values ('01', 'Quiñonez', 'Cultura física');
+insert into profesor values ('02','Lionel', 'Sociales');
+insert into profesor values ('03','Lucio', 'Biología');
+insert into profesor values ('04','Adriano', 'Economía');
+insert into profesor values ('05','Ruffy', 'Historia');
+insert into profesor values ('06','Marcelo', 'Dibujo');
+insert into profesor values ('07','Sergio', 'Cultura física');
+
+--PROFESORES-CURSOS
+insert into profesores_curso values ( '2011', 'Marcelo', 'terceroC', '04', 'Economía' );
+insert into profesores_curso values ( '2011', 'Marcelo', 'terceroC', '01', 'Cultura física' );
+insert into profesores_curso values ( '2011', 'Marcelo', 'terceroC', '03', 'Biología' );
+insert into profesores_curso values ( '2010', 'Sergio', 'segundoB', '03', 'Biología' );
+insert into profesores_curso values ( '2009', 'Ruffy', 'decimoB', '05', 'Historia' );
+insert into profesores_curso values ( '2011', 'Marcelo', 'terceroC', '06', 'Dibujo' );
+insert into profesores_curso values ( '2010', 'Sergio', 'segundoB', '07', 'Cultura física' );
+insert into profesores_curso values ( '2010', 'Sergio', 'segundoB', '02', 'Sociales' );
+insert into profesores_curso values ( '2009', 'Sergio', 'segundoB', '03', 'Biología' );
+
+--ESTUDIANTE EN CURSO
+insert into estudiantes_curso values ('2009', 'Ruffy','decimoB', '01');
+insert into estudiantes_curso values ('2011', 'Marcelo','terceroC', '02');
+insert into estudiantes_curso values ('2010', 'Sergio','segundoB', '03');
+insert into estudiantes_curso values ('2009', 'Ruffy','decimoB', '04');
+insert into estudiantes_curso values ('2011', 'Marcelo','terceroC', '05');
+
+
+INSERT INTO estudiante_materia values ('01', 'Cultura física','01', 10, 10, null, TRUE, '2011', 'Marcelo', 'terceroC' );
+INSERT INTO estudiante_materia values ('01', 'Cultura física','02', 7, 6, null, FALSE, '2011', 'Marcelo', 'terceroC' );
+INSERT INTO estudiante_materia values ('02', 'Sociales','03', 10, 6, 10, TRUE,'2010','Sergio', 'segundoB' );
+INSERT INTO estudiante_materia values ('03', 'Biología','04', 7, 7, null, FALSE, '2010','Sergio', 'segundoB' );
+INSERT INTO estudiante_materia values ('04', 'Economía','05', 10, 7, null, TRUE, '2011','Marcelo', 'terceroC' );
+
+--MATRICULAS
+	INSERT INTO MATRICULA_ESTUDIANTE values('01','01','2011');
+INSERT INTO MATRICULA_ESTUDIANTE values('02','02','2011');
+INSERT INTO MATRICULA_ESTUDIANTE values('03','01','2010');
+INSERT INTO MATRICULA_ESTUDIANTE values('04','01','2009');
+INSERT INTO MATRICULA_ESTUDIANTE values('05','03','2011');
+INSERT INTO MATRICULA_ESTUDIANTE values('06','04','2011');
+INSERT INTO MATRICULA_ESTUDIANTE values('07','05','2011');
+SELECT * FROM MATRICULA_ESTUDIANTE;
+DELETE FROM MATRICULA_ESTUDIANTE WHERE ID_MATRICULA = '07';
+
+/*==============================================================*/
+/* TRIGGERS				                                        */
+/*==============================================================*/
+create or replace function Actualizar_estudiantes() returns trigger 
+as
+$$
+declare
+PERIODOO VARCHAR(10);
+begin 
+    IF (TG_OP = 'INSERT') THEN
+	SELECT NEW.MPERIODO FROM MATRICULA_ESTUDIANTE
+	INTO PERIODOO;
+	UPDATE periodo_academico set estudiantes_matriculados = estudiantes_matriculados +1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOO ; 
+       RETURN NEW;    
+    ELSEIF (TG_OP = 'DELETE') THEN
+	SELECT OLD.MPERIODO FROM MATRICULA_ESTUDIANTE
+	INTO PERIODOo;
+	UPDATE periodo_academico set estudiantes_matriculados = estudiantes_matriculados -1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOo ; 
+    RETURN NULL;
+END IF;
+  END;
+$$
+language plpgsql;
+
+create trigger estudiante_ingresado after insert or delete
+on matricula_estudiante
+for each row
+execute procedure Actualizar_estudiantes();
+
+--OTROS TRIGGERS
+
+create or replace function Actualizar_profesor() returns trigger 
+as
+$$
+declare
+periodoo VARCHAR(10);
+begin 
+    IF (TG_OP = 'INSERT') THEN
+	SELECT NEW.PERIODO FROM PROFESORES_CURSO
+	INTO PERIODOO;
+	UPDATE periodo_academico set PROFESORES_ACTIVOS = PROFESORES_ACTIVOS +1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOO ; 
+       RETURN NEW;    
+    ELSEIF (TG_OP = 'DELETE') THEN
+	SELECT OLD.PERIODO FROM PROFESORES_CURSO
+	INTO PERIODOo;
+	UPDATE periodo_academico set PROFESORES_ACTIVOS = PROFESORES_ACTIVOS -1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOo ; 
+    RETURN NULL;
+END IF;
+  END;
+$$
+language plpgsql;
+
+create trigger profesor_periodo after insert or delete
+on PROFESORES_CURSO
+for each row
+execute procedure Actualizar_profesor();
+
+--.
+create or replace function Actualizar_curso() returns trigger 
+as
+$$
+declare
+periodoo VARCHAR(10);
+tutor varchar(10);
+nivel varchar(10);
+begin 
+    IF (TG_OP = 'INSERT') THEN
+	SELECT NEW.PERIODO, new.profesor_tutor, new.nivel_paralelo FROM estudiantes_curso
+	INTO PERIODOo, tutor, nivel;
+	UPDATE curso set estudiantes = estudiantes +1 
+	WHERE curso.PERIODO = PERIODOo and  curso.profesor_tutor = tutor and
+	curso.nivel_paralelo = nivel ; 
+       RETURN NEW;    
+    ELSEIF (TG_OP = 'DELETE') THEN
+	SELECT old.PERIODO, old.profesor_tutor, old.nivel_paralelo FROM estudiantes_curso
+	INTO PERIODOo, tutor, nivel;
+	UPDATE curso set estudiantes = estudiantes -1 
+	WHERE curso.PERIODO = PERIODO and curso.profesor_tutor = tutor and
+	curso.nivel_paralelo = nivel ; 
+    RETURN NULL;
+END IF;
+  END;
+$$
+language plpgsql;
+
+create trigger estudiante_curso after insert or delete
+on estudiantes_curso
+for each row
+execute procedure Actualizar_curso();
+
+
+
+
+/*==============================================================*/
+/* CURSOR				                                        */
+/*==============================================================*/
+
+do $$
+	declare
+		registro Record;
+		Cur_datos Cursor for select * from CURSO ;
+	begin
+		open Cur_datos;
+		fetch Cur_datos into registro;
+		While (found) loop		
+		Raise Notice 'Periodo: %; Tutor: %; Curso: %',registro.periodo, registro.profesor_tutor, registro.nivel_paralelo;
+		fetch Cur_datos into registro;
+		end loop;
+end $$
+language 'plpgsql';
+	
+/*==============================================================*/
+/* PROCEDIMIENTO ALMACENADO                                     */
+/*==============================================================*/
+CREATE or replace FUNCTION familiares (apellido varchar(10))
+RETURNS table (nombres varchar (50))
+ AS $$
+DECLARE
+  curr_rec record;
+BEGIN
+  FOR curr_rec IN (select * from estudiante	  
+	  where 	  
+	  apellidos_estudiante = $1) LOOP
+    	nombres :=curr_rec.nombres_estudiante;
+    RETURN NEXT;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+select familiares ('ZAMBRANO VERA');	  
+
+	   
+
+/*==============================================================*/
+/* REPORTE														*/
+/*==============================================================*/
+Select periodo,
+sum(case when resultado = 'false' then 1 else 0 end) as false, 
+sum(case when resultado = 'true' then 1 else 0 end) as true
+from  ESTUDIANTE_MATERIA group by periodo order by periodo;
