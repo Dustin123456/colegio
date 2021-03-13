@@ -1,0 +1,18 @@
+CREATE or replace FUNCTION familiares (apellido varchar(10))
+RETURNS table (nombres varchar (50))
+ AS $$
+DECLARE
+  curr_rec record;
+BEGIN
+  FOR curr_rec IN (select * from estudiante	  
+	  where 	  
+	  apellidos_estudiante = $1) LOOP
+    	nombres :=curr_rec.nombres_estudiante;
+    RETURN NEXT;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+select familiares ('ZAMBRANO VERA');	  
+
+	   
