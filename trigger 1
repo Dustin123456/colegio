@@ -1,0 +1,27 @@
+create or replace function Actualizar_estudiantes() returns trigger 
+as
+$$
+declare
+PERIODOO VARCHAR(10);
+begin 
+    IF (TG_OP = 'INSERT') THEN
+	SELECT NEW.MPERIODO FROM MATRICULA_ESTUDIANTE
+	INTO PERIODOO;
+	UPDATE periodo_academico set estudiantes_matriculados = estudiantes_matriculados +1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOO ; 
+       RETURN NEW;    
+    ELSEIF (TG_OP = 'DELETE') THEN
+	SELECT OLD.MPERIODO FROM MATRICULA_ESTUDIANTE
+	INTO PERIODOo;
+	UPDATE periodo_academico set estudiantes_matriculados = estudiantes_matriculados -1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOo ; 
+    RETURN NULL;
+END IF;
+  END;
+$$
+language plpgsql;
+
+create trigger estudiante_ingresado after insert or delete
+on matricula_estudiante
+for each row
+execute procedure Actualizar_estudiantes();
