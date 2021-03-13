@@ -1,0 +1,27 @@
+create or replace function Actualizar_profesor() returns trigger 
+as
+$$
+declare
+periodoo VARCHAR(10);
+begin 
+    IF (TG_OP = 'INSERT') THEN
+	SELECT NEW.PERIODO FROM PROFESORES_CURSO
+	INTO PERIODOO;
+	UPDATE periodo_academico set PROFESORES_ACTIVOS = PROFESORES_ACTIVOS +1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOO ; 
+       RETURN NEW;    
+    ELSEIF (TG_OP = 'DELETE') THEN
+	SELECT OLD.PERIODO FROM PROFESORES_CURSO
+	INTO PERIODOo;
+	UPDATE periodo_academico set PROFESORES_ACTIVOS = PROFESORES_ACTIVOS -1 
+	WHERE PERIODO_ACADEMICO.INICIO_PERIODO = PERIODOo ; 
+    RETURN NULL;
+END IF;
+  END;
+$$
+language plpgsql;
+
+create trigger profesor_periodo after insert or delete
+on PROFESORES_CURSO
+for each row
+execute procedure Actualizar_profesor();
