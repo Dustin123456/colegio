@@ -1,0 +1,14 @@
+do $$
+	declare
+		registro Record;
+		Cur_datos Cursor for select * from CURSO ;
+	begin
+		open Cur_datos;
+		fetch Cur_datos into registro;
+		While (found) loop		
+		Raise Notice 'Periodo: %; Tutor: %; Curso: %',registro.periodo, registro.profesor_tutor, registro.nivel_paralelo;
+		fetch Cur_datos into registro;
+		end loop;
+end $$
+language 'plpgsql';
+	
